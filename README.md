@@ -1,58 +1,48 @@
-# Gestión de Estudiantes y Cursos - Spring Boot + JPA + MySQL
+# Seguridad en Aplicaciones Web - Spring Boot + Spring Security 6 + MySQL
 
 ## Autor
 
 - **Nombre:** Jhoseth Esneider Rozo Carrillo
-- **Código:** 02230131027
-- **Programa:** Ingeniería de Sistemas
-- **Unidad:** 8 Perwsistencia con JPA/Hibernate
-- **Actividad:** Post-Contenido 2
-- **Fecha:** 19/04/2026
+- **Codigo:** 02230131027
+- **Programa:** Ingenieria de Sistemas
+- **Unidad:** 9 Seguridad en Aplicaciones Web
+- **Actividad:** Post-Contenido 1
+- **Fecha:** 05/05/2026
 
 ---
 
-## Descripción del Proyecto
+## Descripcion del Proyecto
 
-Este proyecto consiste en la implementación de una relación muchos a muchos (ManyToMany) entre las entidades Curso y Estudiante utilizando Spring Boot, Spring Data JPA e Hibernate.
+Este proyecto toma como base el Post-Contenido de la Unidad 8 con Spring Boot, JPA, Thymeleaf y MySQL, y agrega un sistema de autenticacion completo con Spring Security 6.
 
-El sistema permite gestionar cursos y estudiantes, así como las inscripciones entre ambos, donde:
-
-- Un estudiante puede estar en múltiples cursos
-- Un curso puede tener múltiples estudiantes
-
-La relación se implementa mediante una tabla intermedia llamada curso_estudiante.
+El sistema permite registrar usuarios con contrasenias hasheadas mediante `BCryptPasswordEncoder`, iniciar sesion con formulario personalizado, autenticar contra MySQL usando `UserDetailsService` y controlar el acceso por roles `ADMIN` y `USER`.
 
 ### Funcionalidades Implementadas
 
-**-Post-Contenido 1:**
+**Post-Contenido 1 - Unidad 9:**
 
-- CRUD completo de Estudiantes
-- Entidad JPA con validaciones (@NotBlank, @Email, @Size)
-- Persistencia en MySQL con Hibernate
-- Interfaz web con Thymeleaf
-
-**Post-Contenido 2:**
-
-- Entidad Curso con relación @ManyToMany bidireccional
-- Tabla de unión automática `curso_estudiante` con claves foráneas
-- Servicio con inscripción/desinscripción transaccional
-- Controlador con rutas para gestionar inscripciones
-- Plantillas para crear cursos e inscribir estudiantes
-- Optimización con JOIN FETCH para evitar problema N+1
-- Helper methods para sincronizar relación bidireccional
+- Dependencias `spring-boot-starter-security` y `thymeleaf-extras-springsecurity6`.
+- Entidad `Usuario` mapeada a la tabla `usuarios`.
+- Registro de usuarios con BCrypt y rol por defecto `ROLE_USER`.
+- Login personalizado en `/login`.
+- Autenticacion por email consultando MySQL con `UsuarioDetailsService`.
+- Dashboard protegido en `/dashboard`.
+- Panel de administracion protegido en `/admin`, disponible solo para `ROLE_ADMIN`.
+- Logout con invalidacion de sesion y eliminacion de cookie `JSESSIONID`.
 
 ---
 
-## Tecnologías Utilizadas
+## Tecnologias Utilizadas
 
 - **Spring Boot 3.2.5**: Framework principal
+- **Spring Security 6**: Autenticacion, autorizacion y logout
 - **Spring Data JPA**: Acceso a datos
 - **Hibernate 6.4.4**: Proveedor ORM
 - **MySQL 8.x**: Base de datos relacional
-- **MySQL Connector/J 8.3.0**: Driver JDBC
 - **Thymeleaf 3.1.2**: Motor de plantillas
-- **Jakarta Validation 3.0.2**: Validación de datos
-- **Java 17**: Lenguaje de programación
+- **Thymeleaf Extras Spring Security 6**: Control de vistas por rol
+- **Jakarta Validation 3.0.2**: Validacion de formularios
+- **Java 17**: Lenguaje de programacion
 - **Maven 3.x**: Gestor de dependencias
 
 ---
@@ -61,54 +51,61 @@ La relación se implementa mediante una tabla intermedia llamada curso_estudiant
 
 - src/main/java/com/universidad/estudiantes/
 - ├── EstudiantesApplication.java
+- ├── config/
+- │ └── SecurityConfig.java -> SecurityFilterChain, BCrypt y reglas por rol
 - ├── controller/
-- │ ├── EstudianteController.java → CRUD Estudiantes (Post-1)
-- │ └── CursoController.java → CRUD Cursos + Inscripciones (Post-2)
+- │ ├── AuthController.java -> Login, registro, dashboard y panel admin
+- │ ├── EstudianteController.java -> CRUD Estudiantes de Unidad 8
+- │ └── CursoController.java -> Cursos e inscripciones de Unidad 8
 - ├── model/
-- │ ├── Estudiante.java → Lado inverso @ManyToMany(mappedBy)
-- │ └── Curso.java → Lado propietario @ManyToMany + @JoinTable
+- │ ├── Usuario.java -> Entidad de autenticacion
+- │ ├── Estudiante.java
+- │ └── Curso.java
 - ├── repository/
-- │ ├── EstudianteRepository.java → JpaRepository con consultas derivadas
-- │ └── CursoRepository.java → JpaRepository con JOIN FETCH
+- │ ├── UsuarioRepository.java -> Busqueda por email
+- │ ├── EstudianteRepository.java
+- │ └── CursoRepository.java
 - └── service/
-- ├── EstudianteService.java → Lógica negocio estudiantes
-- └── CursoService.java → Lógica negocio cursos + inscripciones
+- ├── UsuarioService.java -> Registro con BCrypt y listado de usuarios
+- ├── UsuarioDetailsService.java -> UserDetailsService contra MySQL
+- ├── EstudianteService.java
+- └── CursoService.java
 
 - src/main/resources/
-- ├── application.properties → Configuración MySQL y JPA
+- ├── application.properties -> Configuracion MySQL y JPA
 - └── templates/
-- ├── estudiantes/
-- │ ├── lista.html → Listado de estudiantes
-- │ ├── formulario.html → Crear/Editar estudiante
-- │ └── confirmar-eliminar.html → Confirmación de eliminación
-- └── cursos/
--        ├── lista.html                  → Listado de cursos con cantidad de inscritos
--        ├── formulario.html             → Crear/Editar curso
--        └── inscribir.html              → Gestionar inscripciones (lado izq: inscritos, lado der: disponibles)
+- ├── auth/
+- │ ├── login.html -> Formulario personalizado
+- │ └── registro.html -> Registro de usuarios
+- ├── admin/
+- │ └── panel.html -> Lista de usuarios, solo ADMIN
+- └── dashboard.html -> Vista protegida por autenticacion
 
 ---
 
-## Configuración de la Base de Datos
+## Configuracion de la Base de Datos
 
 ### 1. Crear Base de Datos en MySQL
 
 Ejecuta estos comandos en MySQL:
 
+```bash
 mysql -u root -p
-
-# Ingresa tu contraseña de MySQL
+```
 
 Dentro de MySQL ejecutar:
 
-sql
+```sql
 CREATE DATABASE estudiantes_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'apppass';
-GRANT ALL PRIVILEGES ON estudiantes_db.\* TO 'appuser'@'localhost';
+GRANT ALL PRIVILEGES ON estudiantes_db.* TO 'appuser'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
+```
 
 ### 2. Configurar application.properties
 
+```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/estudiantes_db?useSSL=false&serverTimezone=UTC
 spring.datasource.username=appuser
 spring.datasource.password=apppass
@@ -120,108 +117,141 @@ spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
 
 server.port=8080
+```
 
 ---
 
-## Relación ManyToMany
+## Instrucciones de Ejecucion
 
-La relación entre Curso y Estudiante se define así:
+### 1. Ingresar a MySQL o MariaDB
 
-- Curso es el lado propietario
-- Estudiante es el lado inverso
-- Se utiliza la tabla intermedia curso_estudiante
-
-### Tabla generada
-
-curso_estudiante
-
-curso_id
-estudiante_id
-
----
-
-## Instrucciones de Ejecución
-
-### 1: Ingresar a Mariadb
-
+```bash
 C:\xampp\mysql\bin\mysql.exe -u root -p
+```
 
-# (Ingresa contraseña de MySQL)
-
-### 2: Ejecutar la Aplicación
+### 2. Ejecutar la aplicacion
 
 En PowerShell, en la carpeta del proyecto:
 
+```bash
 cd "C:\Users\Public\Dev\estudiantes"
 .\mvnw.cmd spring-boot:run
+```
 
-Espera a ver en la consola:
+Espera a ver en consola:
 
+```text
 Started EstudiantesApplication in X.XXX seconds
+```
 
-### 3: Acceder a la Aplicación
+### 3. Acceder a la aplicacion
 
-Estudiantes: http://localhost:8080/estudiantes
-Cursos: http://localhost:8080/cursos
+- Login: http://localhost:8080/login
+- Registro: http://localhost:8080/registro
+- Dashboard: http://localhost:8080/dashboard
+- Panel ADMIN: http://localhost:8080/admin
 
 ---
 
-## CHECKPOINTS DE VERIFICACIÓN
+## Usuario ADMIN de Prueba
+
+Para probar el rol ADMIN, primero ejecuta la aplicacion para que Hibernate cree la tabla `usuarios`. Luego inserta manualmente este usuario en MySQL.
+
+La contrasenia en texto claro para la prueba es:
+
+```text
+admin123
+```
+
+Inserta el usuario ADMIN con un hash BCrypt de `admin123`:
+
+```sql
+INSERT INTO usuarios (nombre, email, contrasenia, rol, activo)
+VALUES (
+  'Administrador',
+  'admin@universidad.edu',
+  '$2a$12$QsdO.4Y7/URGB9hRHIPuqOTcnTj66Nof8OqrD0Kj06vX4LS6o9P6i',
+  'ROLE_ADMIN',
+  1
+);
+```
+
+Usuarios de prueba:
+
+- **ADMIN:** admin@universidad.edu / admin123
+- **USER:** registrar desde `/registro` con cualquier correo y contrasenia.
+
+---
+
+## CHECKPOINTS DE VERIFICACION
 
 ### Checkpoint 1
 
-- Se crean automáticamente las tablas:
-  - estudiantes
-  - cursos
-  - curso_estudiante
+- Ejecutar la aplicacion sin errores.
+- Abrir http://localhost:8080/dashboard.
+- Verificar que Spring Security redirige automaticamente a `/login`.
+- Confirmar que aparece el formulario personalizado, no el login por defecto de Spring.
 
 ### Checkpoint 2
 
-- Se crean cursos y se inscriben estudiantes
-- Se verifica en MySQL:
+- Abrir http://localhost:8080/registro.
+- Registrar un nuevo usuario con rol por defecto `ROLE_USER`.
+- Verificar en MySQL que la contrasenia guardada comienza por `$2a$12$`:
 
-SELECT \* FROM curso_estudiante;
+```sql
+SELECT nombre, email, contrasenia, rol, activo FROM usuarios;
+```
+
+- Iniciar sesion con el usuario registrado.
+- Confirmar que `/dashboard` muestra el nombre del usuario.
+- Intentar abrir http://localhost:8080/admin con el usuario USER.
+- Verificar que Spring Security muestra `403 Forbidden`.
 
 ### Checkpoint 3
 
-- Se desinscribe un estudiante
-- La relación desaparece de curso_estudiante
-- El estudiante sigue existiendo en la tabla estudiantes
+- Iniciar sesion como `admin@universidad.edu` con contrasenia `admin123`.
+- Abrir http://localhost:8080/admin.
+- Verificar que se muestra la lista de usuarios.
+- Cerrar sesion con el boton `Cerrar Sesion`.
+- Verificar que redirige a `/login?logout`.
+- Intentar abrir http://localhost:8080/dashboard despues del logout y confirmar que redirige a `/login`.
+
+---
+
+## Capturas del Proyecto
+
+Guarda las capturas requeridas en la carpeta `/evidencias/` con estos nombres:
+
+- `post1_login.png`: formulario login personalizado.
+- `post1_dashboard_user.png`: dashboard de usuario USER.
+- `post1_admin_panel.png`: panel ADMIN con lista de usuarios.
+- `post1_error_403_user.png`: error 403 al entrar a `/admin` como USER.
+- `post1_bcrypt_mysql.png`: consulta MySQL mostrando contrasenia BCrypt.
 
 ---
 
 ## Conceptos Clave Implementados
 
-### JOIN FETCH para Evitar N+1
+### BCryptPasswordEncoder
 
-java
-@Query("SELECT c FROM Curso c LEFT JOIN FETCH c.estudiantes")
-List<Curso> findAllConEstudiantes();
-
-Una sola consulta trae todos los cursos y sus estudiantes.
-
-### Transacciones
-
-java
-@Transactional
-public void inscribirEstudiante(Long cursoId, Long estudianteId) {
-// Garantiza atomicidad (todo se guarda o nada)
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder(12);
 }
+```
 
----
+### UserDetailsService contra MySQL
 
-# Capturas del Proyecto
+```java
+Usuario u = repo.findByEmail(email)
+    .orElseThrow(() -> new UsernameNotFoundException(
+        "Usuario no encontrado: " + email));
+```
 
-Las siguientes capturas se encuentran en la carpeta `/evidencias/`:
+### Rutas Protegidas por Rol
 
-## App corriendo Hibernate genera tabla "curso_estudiante"
-
-![Captura hibernate_genera_tabla](evidencias/captura_hibernate_genera_tabla.png)
-
-## Inscribir estudiantes a cursos
-
-![Captura inscribir_estudiantes_a_cursos](evidencias/captura_inscribir_estudiantes-a_cursos.png)
-
-## Desinscribir estudiante y confirmar que la carga de cursos usa JOIN
-
-![Captura desinscribir_estudiante](evidencias/captura_desinscribir_estudiante.png)
+```java
+.requestMatchers("/admin/**", "/admin").hasRole("ADMIN")
+.anyRequest().authenticated()
+```

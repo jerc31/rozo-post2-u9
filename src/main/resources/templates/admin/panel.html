@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administracion</title>
+</head>
+<body>
+  <h1>Panel de Administracion</h1>
+  <p>Usuario autenticado: <strong sec:authentication="name"></strong></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="u : ${usuarios}">
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.nombre}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.rol}"></td>
+        <td th:text="${u.activo}"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a th:href="@{/dashboard}">Volver al Dashboard</a>
+  <form th:action="@{/logout}" method="post">
+    <button type="submit">Cerrar Sesion</button>
+  </form>
+</body>
+</html>

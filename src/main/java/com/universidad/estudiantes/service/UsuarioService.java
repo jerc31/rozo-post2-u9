@@ -4,6 +4,7 @@ import com.universidad.estudiantes.model.Usuario;
 import com.universidad.estudiantes.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +31,9 @@ public class UsuarioService {
 
     public List<Usuario> listarTodos() {
         return repo.findAll();
+    }
+
+    public Optional<Usuario> buscarPorEmail(String email) {
+        return repo.findByEmail(email);
     }
 }

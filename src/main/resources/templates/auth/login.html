@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesion</title>
+</head>
+<body>
+  <h1>Iniciar Sesion</h1>
+  <form th:action="@{/login}" method="post">
+    <div th:if="${param.error}" style="color:red">
+      Correo o contrasenia incorrectos.
+    </div>
+    <div th:if="${param.logout}">Sesion cerrada correctamente.</div>
+    <div th:if="${param.registrado}">Registro exitoso. Inicie sesion.</div>
+    <label>Correo: <input type="email" name="username" required /></label>
+    <label>Contrasenia: <input type="password" name="password" required /></label>
+    <button type="submit">Ingresar</button>
+  </form>
+  <a th:href="@{/registro}">No tiene cuenta? Registrarse</a>
+</body>
+</html>
