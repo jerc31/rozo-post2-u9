@@ -17,17 +17,6 @@ Este proyecto extiende el Post-Contenido 1 de la Unidad 9. Ademas del login, reg
 
 ### Funcionalidades Implementadas
 
-**Post-Contenido 1 - Unidad 9:**
-
-- Registro de usuarios con contrasenias hasheadas mediante BCrypt.
-- Login personalizado con Spring Security 6.
-- `UserDetailsService` consultando usuarios desde MySQL.
-- Roles `ROLE_ADMIN` y `ROLE_USER`.
-- Ruta `/admin` protegida para ADMIN.
-- Logout con invalidacion de sesion.
-
-**Post-Contenido 2 - Unidad 9:**
-
 - `@PreAuthorize` en la capa de servicio.
 - Expresiones SpEL distintas: `hasRole`, `hasAnyRole`, comparacion contra `authentication.name`.
 - Vista personalizada para error `403`.
@@ -267,7 +256,9 @@ http://localhost:8080/seguridad/usuarios
 1. Registrar un usuario con este nombre:
 
 ```html
-<script>alert("XSS")</script>
+<script>
+  alert("XSS");
+</script>
 ```
 
 2. Iniciar sesion con ese usuario.
@@ -302,8 +293,9 @@ Para verificar CSRF desde consola del navegador:
 3. Ejecutar:
 
 ```javascript
-fetch("/logout", { method: "POST" })
-  .then(r => console.log("Status:", r.status));
+fetch("/logout", { method: "POST" }).then((r) =>
+  console.log("Status:", r.status),
+);
 ```
 
 4. Resultado esperado:
@@ -328,20 +320,24 @@ HTTP/1.1 403 Forbidden
 
 ## Capturas del Proyecto
 
-Guarda las capturas requeridas en la carpeta `/evidencias/` con estos nombres:
+Las siguientes capturas se encuentran en la carpeta `/evidencias/`:
 
-- `post2_preauthorize_403.png`: error 403 personalizado al entrar a `/seguridad/usuarios` como USER.
-- `post2_xss_escapado_dashboard.png`: dashboard mostrando `<script>alert("XSS")</script>` como texto.
-- `post2_xss_html_escapado.png`: DevTools mostrando `&lt;script&gt;`.
-- `post2_csp_header.png`: DevTools Network con `Content-Security-Policy`.
-- `post2_csrf_403.png`: consola o curl mostrando status `403` al hacer POST sin token.
+# Error 403 al entrar a `/seguridad/usuarios` como USER
 
----
+![error_403](evidencias/captura_preauthorize_403.png)
 
-## Commits Requeridos
+## Dashboard mostrando `<script>alert("XSS")</script>` como texto
 
-El repositorio incluye al menos 3 commits descriptivos para Post-Contenido 2:
+![xss_escapado](evidencias/captura_xss_escapado_dashboard.png)
 
-- `feat: agregar autorizacion por metodo con preauthorize`
-- `feat: agregar pagina personalizada para error 403`
-- `feat: agregar csp y documentar pruebas xss csrf`
+## DevTools mostrando `&lt;script&gt;`
+
+![xss_html](evidencias/captura_xss_html_escapado.png)
+
+## DevTools Network con `Content-Security-Policy`
+
+![csp_header](evidencias/captura_csp_header.png)
+
+## consola mostrando status `403` al hacer POST sin token.
+
+![csrf](evidencias/captura_csrf_403.png)
