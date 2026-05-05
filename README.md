@@ -218,15 +218,29 @@ SELECT nombre, email, contrasenia, rol, activo FROM usuarios;
 
 ---
 
-## Capturas del Proyecto
+## Capturas de Pantalla
 
-Guarda las capturas requeridas en la carpeta `/evidencias/` con estos nombres:
+Las siguientes capturas se encuentran en la carpeta `/evidencias/`:
 
-- `post1_login.png`: formulario login personalizado.
-- `post1_dashboard_user.png`: dashboard de usuario USER.
-- `post1_admin_panel.png`: panel ADMIN con lista de usuarios.
-- `post1_error_403_user.png`: error 403 al entrar a `/admin` como USER.
-- `post1_bcrypt_mysql.png`: consulta MySQL mostrando contrasenia BCrypt.
+# App corriendo con formulario login
+
+![login](evidencias/captura_login.png)
+
+## Consulta MySQL mostrando contraseñaa BCrypt
+
+![Captura respuesta_json](evidencias/captura_bcrypt_mysql.png)
+
+## dashboard de usuario
+
+![dashboard_user](evidencias/captura_dashboard_user.png)
+
+## error 403 al entrar a `/admin` como USER
+
+![error_403](evidencias/captura_error_403_user.png)
+
+## Panel ADMIN con lista de usuarios
+
+![admin_panel](evidencias/captura_admin_panel.png)
 
 ---
 
