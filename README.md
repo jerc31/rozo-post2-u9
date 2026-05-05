@@ -6,40 +6,45 @@
 - **Codigo:** 02230131027
 - **Programa:** Ingenieria de Sistemas
 - **Unidad:** 9 Seguridad en Aplicaciones Web
-- **Actividad:** Post-Contenido 1
+- **Actividad:** Post-Contenido 2
 - **Fecha:** 05/05/2026
 
 ---
 
 ## Descripcion del Proyecto
 
-Este proyecto toma como base el Post-Contenido de la Unidad 8 con Spring Boot, JPA, Thymeleaf y MySQL, y agrega un sistema de autenticacion completo con Spring Security 6.
-
-El sistema permite registrar usuarios con contrasenias hasheadas mediante `BCryptPasswordEncoder`, iniciar sesion con formulario personalizado, autenticar contra MySQL usando `UserDetailsService` y controlar el acceso por roles `ADMIN` y `USER`.
+Este proyecto extiende el Post-Contenido 1 de la Unidad 9. Ademas del login, registro, BCrypt, roles `ADMIN` y `USER`, ahora verifica protecciones activas de seguridad con autorizacion a nivel de metodo, mitigacion de XSS, cabecera Content-Security-Policy y proteccion CSRF.
 
 ### Funcionalidades Implementadas
 
 **Post-Contenido 1 - Unidad 9:**
 
-- Dependencias `spring-boot-starter-security` y `thymeleaf-extras-springsecurity6`.
-- Entidad `Usuario` mapeada a la tabla `usuarios`.
-- Registro de usuarios con BCrypt y rol por defecto `ROLE_USER`.
-- Login personalizado en `/login`.
-- Autenticacion por email consultando MySQL con `UsuarioDetailsService`.
-- Dashboard protegido en `/dashboard`.
-- Panel de administracion protegido en `/admin`, disponible solo para `ROLE_ADMIN`.
-- Logout con invalidacion de sesion y eliminacion de cookie `JSESSIONID`.
+- Registro de usuarios con contrasenias hasheadas mediante BCrypt.
+- Login personalizado con Spring Security 6.
+- `UserDetailsService` consultando usuarios desde MySQL.
+- Roles `ROLE_ADMIN` y `ROLE_USER`.
+- Ruta `/admin` protegida para ADMIN.
+- Logout con invalidacion de sesion.
+
+**Post-Contenido 2 - Unidad 9:**
+
+- `@PreAuthorize` en la capa de servicio.
+- Expresiones SpEL distintas: `hasRole`, `hasAnyRole`, comparacion contra `authentication.name`.
+- Vista personalizada para error `403`.
+- Mitigacion de XSS mostrando datos de usuario con `th:text`.
+- Cabecera `Content-Security-Policy` configurada.
+- Verificacion de CSRF enviando POST sin token.
 
 ---
 
 ## Tecnologias Utilizadas
 
 - **Spring Boot 3.2.5**: Framework principal
-- **Spring Security 6**: Autenticacion, autorizacion y logout
+- **Spring Security 6**: Autenticacion, autorizacion, CSRF y cabeceras de seguridad
 - **Spring Data JPA**: Acceso a datos
 - **Hibernate 6.4.4**: Proveedor ORM
 - **MySQL 8.x**: Base de datos relacional
-- **Thymeleaf 3.1.2**: Motor de plantillas
+- **Thymeleaf 3.1.2**: Motor de plantillas con escape HTML por defecto
 - **Thymeleaf Extras Spring Security 6**: Control de vistas por rol
 - **Jakarta Validation 3.0.2**: Validacion de formularios
 - **Java 17**: Lenguaje de programacion
@@ -52,42 +57,43 @@ El sistema permite registrar usuarios con contrasenias hasheadas mediante `BCryp
 - src/main/java/com/universidad/estudiantes/
 - ├── EstudiantesApplication.java
 - ├── config/
-- │ └── SecurityConfig.java -> SecurityFilterChain, BCrypt y reglas por rol
+- │ └── SecurityConfig.java -> SecurityFilterChain, BCrypt, 403, CSP y reglas por rol
 - ├── controller/
-- │ ├── AuthController.java -> Login, registro, dashboard y panel admin
-- │ ├── EstudianteController.java -> CRUD Estudiantes de Unidad 8
-- │ └── CursoController.java -> Cursos e inscripciones de Unidad 8
+- │ ├── AuthController.java -> Login, registro, dashboard, panel admin y prueba PreAuthorize
+- │ ├── ErrorController.java -> Vista personalizada `/error/403`
+- │ ├── EstudianteController.java
+- │ └── CursoController.java
 - ├── model/
 - │ ├── Usuario.java -> Entidad de autenticacion
 - │ ├── Estudiante.java
 - │ └── Curso.java
 - ├── repository/
-- │ ├── UsuarioRepository.java -> Busqueda por email
+- │ ├── UsuarioRepository.java
 - │ ├── EstudianteRepository.java
 - │ └── CursoRepository.java
 - └── service/
-- ├── UsuarioService.java -> Registro con BCrypt y listado de usuarios
-- ├── UsuarioDetailsService.java -> UserDetailsService contra MySQL
+- ├── UsuarioService.java -> Registro, consultas y metodos con `@PreAuthorize`
+- ├── UsuarioDetailsService.java
 - ├── EstudianteService.java
 - └── CursoService.java
 
 - src/main/resources/
-- ├── application.properties -> Configuracion MySQL y JPA
+- ├── application.properties
 - └── templates/
 - ├── auth/
-- │ ├── login.html -> Formulario personalizado
-- │ └── registro.html -> Registro de usuarios
+- │ ├── login.html
+- │ └── registro.html
 - ├── admin/
-- │ └── panel.html -> Lista de usuarios, solo ADMIN
-- └── dashboard.html -> Vista protegida por autenticacion
+- │ └── panel.html
+- ├── error/
+- │ └── 403.html
+- └── dashboard.html
 
 ---
 
 ## Configuracion de la Base de Datos
 
 ### 1. Crear Base de Datos en MySQL
-
-Ejecuta estos comandos en MySQL:
 
 ```bash
 mysql -u root -p
@@ -150,20 +156,19 @@ Started EstudiantesApplication in X.XXX seconds
 - Registro: http://localhost:8080/registro
 - Dashboard: http://localhost:8080/dashboard
 - Panel ADMIN: http://localhost:8080/admin
+- Prueba `@PreAuthorize`: http://localhost:8080/seguridad/usuarios
 
 ---
 
 ## Usuario ADMIN de Prueba
 
-Para probar el rol ADMIN, primero ejecuta la aplicacion para que Hibernate cree la tabla `usuarios`. Luego inserta manualmente este usuario en MySQL.
+Primero ejecuta la aplicacion para que Hibernate cree la tabla `usuarios`. Luego inserta manualmente este usuario en MySQL.
 
 La contrasenia en texto claro para la prueba es:
 
 ```text
 admin123
 ```
-
-Inserta el usuario ADMIN con un hash BCrypt de `admin123`:
 
 ```sql
 INSERT INTO usuarios (nombre, email, contrasenia, rol, activo)
@@ -180,92 +185,169 @@ Usuarios de prueba:
 
 - **ADMIN:** admin@universidad.edu / admin123
 - **USER:** registrar desde `/registro` con cualquier correo y contrasenia.
+- **USER XSS:** registrar desde `/registro` con nombre `<script>alert("XSS")</script>`.
+
+---
+
+## Seguridad Implementada
+
+### Autorizacion con @PreAuthorize
+
+En `UsuarioService` se agregaron metodos protegidos:
+
+```java
+@PreAuthorize("hasRole('ADMIN')")
+public List<Usuario> listarTodos()
+```
+
+```java
+@PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
+public Optional<Usuario> buscarPorEmail(String email)
+```
+
+```java
+@PreAuthorize("hasAnyRole('ADMIN')")
+public void cambiarRol(Long id, String nuevoRol)
+```
+
+```java
+@PreAuthorize("#usuario.email == authentication.name or hasRole('ADMIN')")
+public void actualizarNombre(Usuario usuario)
+```
+
+### Pagina 403 Personalizada
+
+Cuando un usuario autenticado no tiene permisos, Spring Security redirige a:
+
+```text
+/error/403
+```
+
+La vista muestra el correo autenticado con:
+
+```html
+<strong sec:authentication="name"></strong>
+```
+
+### Mitigacion XSS con Thymeleaf
+
+El dashboard muestra el nombre del usuario con `th:text`, que escapa HTML:
+
+```html
+<p>Nombre: <span th:text="${usuario.nombre}"></span></p>
+```
+
+No se usa `th:utext` con datos de usuario.
+
+### Content-Security-Policy
+
+La cabecera CSP se configura en `SecurityConfig`:
+
+```text
+default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'
+```
+
+### CSRF
+
+CSRF permanece activo por defecto en Spring Security. Los formularios Thymeleaf con `th:action` incluyen el token automaticamente. Un POST sin token debe responder `403 Forbidden`.
 
 ---
 
 ## CHECKPOINTS DE VERIFICACION
 
-### Checkpoint 1
+### Checkpoint 1 - @PreAuthorize y 403
 
-- Ejecutar la aplicacion sin errores.
-- Abrir http://localhost:8080/dashboard.
-- Verificar que Spring Security redirige automaticamente a `/login`.
-- Confirmar que aparece el formulario personalizado, no el login por defecto de Spring.
+1. Iniciar sesion como usuario USER.
+2. Abrir:
 
-### Checkpoint 2
-
-- Abrir http://localhost:8080/registro.
-- Registrar un nuevo usuario con rol por defecto `ROLE_USER`.
-- Verificar en MySQL que la contrasenia guardada comienza por `$2a$12$`:
-
-```sql
-SELECT nombre, email, contrasenia, rol, activo FROM usuarios;
+```text
+http://localhost:8080/seguridad/usuarios
 ```
 
-- Iniciar sesion con el usuario registrado.
-- Confirmar que `/dashboard` muestra el nombre del usuario.
-- Intentar abrir http://localhost:8080/admin con el usuario USER.
-- Verificar que Spring Security muestra `403 Forbidden`.
+3. El controlador llama `service.listarTodos()`.
+4. `@PreAuthorize("hasRole('ADMIN')")` rechaza al usuario USER.
+5. Debe mostrarse la vista personalizada `Acceso Denegado (403)` con el correo del usuario autenticado.
 
-### Checkpoint 3
+### Checkpoint 2 - XSS mitigado
 
-- Iniciar sesion como `admin@universidad.edu` con contrasenia `admin123`.
-- Abrir http://localhost:8080/admin.
-- Verificar que se muestra la lista de usuarios.
-- Cerrar sesion con el boton `Cerrar Sesion`.
-- Verificar que redirige a `/login?logout`.
-- Intentar abrir http://localhost:8080/dashboard despues del logout y confirmar que redirige a `/login`.
+1. Registrar un usuario con este nombre:
+
+```html
+<script>alert("XSS")</script>
+```
+
+2. Iniciar sesion con ese usuario.
+3. Abrir:
+
+```text
+http://localhost:8080/dashboard
+```
+
+4. El dashboard debe mostrar el texto literal `<script>alert("XSS")</script>`.
+5. No debe aparecer ningun `alert`.
+6. En DevTools, inspeccionar el elemento `Nombre`; debe verse escapado como `&lt;script&gt;`.
+
+### Checkpoint 3 - CSP y CSRF
+
+Para verificar CSP:
+
+1. Abrir Chrome DevTools con F12.
+2. Ir a `Network`.
+3. Recargar `/dashboard`.
+4. Seleccionar la peticion `dashboard`.
+5. En `Response Headers`, verificar:
+
+```text
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'
+```
+
+Para verificar CSRF desde consola del navegador:
+
+1. Iniciar sesion y abrir `/dashboard`.
+2. Abrir DevTools -> Console.
+3. Ejecutar:
+
+```javascript
+fetch("/logout", { method: "POST" })
+  .then(r => console.log("Status:", r.status));
+```
+
+4. Resultado esperado:
+
+```text
+Status: 403
+```
+
+Tambien se puede verificar por curl:
+
+```bash
+curl -X POST http://localhost:8080/logout -v
+```
+
+Respuesta esperada:
+
+```text
+HTTP/1.1 403 Forbidden
+```
 
 ---
 
-## Capturas de Pantalla
+## Capturas del Proyecto
 
-Las siguientes capturas se encuentran en la carpeta `/evidencias/`:
+Guarda las capturas requeridas en la carpeta `/evidencias/` con estos nombres:
 
-# App corriendo con formulario login
-
-![login](evidencias/captura_login.png)
-
-## Consulta MySQL mostrando contraseñaa BCrypt
-
-![Captura respuesta_json](evidencias/captura_bcrypt_mysql.png)
-
-## dashboard de usuario
-
-![dashboard_user](evidencias/captura_dashboard_user.png)
-
-## error 403 al entrar a `/admin` como USER
-
-![error_403](evidencias/captura_error_403_user.png)
-
-## Panel ADMIN con lista de usuarios
-
-![admin_panel](evidencias/captura_admin_panel.png)
+- `post2_preauthorize_403.png`: error 403 personalizado al entrar a `/seguridad/usuarios` como USER.
+- `post2_xss_escapado_dashboard.png`: dashboard mostrando `<script>alert("XSS")</script>` como texto.
+- `post2_xss_html_escapado.png`: DevTools mostrando `&lt;script&gt;`.
+- `post2_csp_header.png`: DevTools Network con `Content-Security-Policy`.
+- `post2_csrf_403.png`: consola o curl mostrando status `403` al hacer POST sin token.
 
 ---
 
-## Conceptos Clave Implementados
+## Commits Requeridos
 
-### BCryptPasswordEncoder
+El repositorio incluye al menos 3 commits descriptivos para Post-Contenido 2:
 
-```java
-@Bean
-public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder(12);
-}
-```
-
-### UserDetailsService contra MySQL
-
-```java
-Usuario u = repo.findByEmail(email)
-    .orElseThrow(() -> new UsernameNotFoundException(
-        "Usuario no encontrado: " + email));
-```
-
-### Rutas Protegidas por Rol
-
-```java
-.requestMatchers("/admin/**", "/admin").hasRole("ADMIN")
-.anyRequest().authenticated()
-```
+- `feat: agregar autorizacion por metodo con preauthorize`
+- `feat: agregar pagina personalizada para error 403`
+- `feat: agregar csp y documentar pruebas xss csrf`

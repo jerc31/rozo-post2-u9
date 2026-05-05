@@ -55,6 +55,17 @@ public class SecurityConfig {
             )
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/error/403")
+            )
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives(
+                        "default-src 'self'; " +
+                        "script-src 'self'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data:; " +
+                        "frame-ancestors 'none'"
+                    )
+                )
             );
         return http.build();
     }

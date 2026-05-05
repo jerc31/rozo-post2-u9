@@ -8,6 +8,7 @@
 <body>
   <h1>Dashboard</h1>
   <p>Bienvenido, <span th:text="${usuario.nombre}"></span></p>
+  <p>Nombre: <span th:text="${usuario.nombre}"></span></p>
   <p>Correo: <span sec:authentication="name"></span></p>
   <p>Roles: <span th:text="${roles}"></span></p>
 
