@@ -61,21 +61,13 @@ Este proyecto extiende el Post-Contenido 1 de la Unidad 9. Ademas del login, reg
 - ├── controller/
 - │ ├── AuthController.java -> Login, registro, dashboard, panel admin y prueba PreAuthorize
 - │ ├── ErrorController.java -> Vista personalizada `/error/403`
-- │ ├── EstudianteController.java
-- │ └── CursoController.java
 - ├── model/
-- │ ├── Usuario.java -> Entidad de autenticacion
-- │ ├── Estudiante.java
-- │ └── Curso.java
+- │ └── Usuario.java -> Entidad de autenticacion
 - ├── repository/
-- │ ├── UsuarioRepository.java
-- │ ├── EstudianteRepository.java
-- │ └── CursoRepository.java
+- │ └── UsuarioRepository.java
 - └── service/
 - ├── UsuarioService.java -> Registro, consultas y metodos con `@PreAuthorize`
-- ├── UsuarioDetailsService.java
-- ├── EstudianteService.java
-- └── CursoService.java
+- └── UsuarioDetailsService.java
 
 - src/main/resources/
 - ├── application.properties
@@ -222,6 +214,8 @@ Cuando un usuario autenticado no tiene permisos, Spring Security redirige a:
 ```text
 /error/403
 ```
+
+La ruta acepta cualquier metodo HTTP para que los accesos denegados por CSRF en POST tambien respondan `403 Forbidden`.
 
 La vista muestra el correo autenticado con:
 
