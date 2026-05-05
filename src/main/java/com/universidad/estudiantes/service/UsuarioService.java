@@ -5,6 +5,7 @@ import com.universidad.estudiantes.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +30,29 @@ public class UsuarioService {
         repo.save(usuario);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Usuario> listarTodos() {
         return repo.findAll();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #email == authentication.name")
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Transactional
+    public void cambiarRol(Long id, String nuevoRol) {
+        Usuario u = repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        u.setRol(nuevoRol);
+    }
+
+    @PreAuthorize("#usuario.email == authentication.name or hasRole('ADMIN')")
+    @Transactional
+    public void actualizarNombre(Usuario usuario) {
+        Usuario existente = repo.findById(usuario.getId())
+            .orElseThrow(() -> new RuntimeException("No encontrado"));
+        existente.setNombre(usuario.getNombre());
     }
 }

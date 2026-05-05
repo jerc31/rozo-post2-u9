@@ -65,4 +65,10 @@ public class AuthController {
         model.addAttribute("usuarios", service.listarTodos());
         return "admin/panel";
     }
+
+    @GetMapping("/seguridad/usuarios")
+    public String pruebaPreAuthorize(Model model) {
+        model.addAttribute("usuarios", service.listarTodos());
+        return "admin/panel";
+    }
 }
